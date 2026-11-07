@@ -1,0 +1,635 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HydroTrack Valve Box</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: the same workbench as the tap device page. 3D stage left, the phone app right, build report below. */
+:root {
+  --bg: #edf1f0; --panel: #ffffff; --ink: #142023; --muted: #586a6d; --line: #d3dcdb; --chip: #e5ebea;
+  --accent: #0a7884; --accent-ink: #ffffff; --warn: #9a620c; --bad: #b23f2a; --ok: #2d7a4d;
+  --stage-1: #fbfdfc; --stage-2: #d5dedd;
+  --app-bg: #f4f7f7; --app-card: #ffffff; --app-ink: #142023; --app-muted: #66787b; --app-line: #e0e7e6;
+  --water: #2a55ff; --amber: #d98a00; --off: #c4442b;
+  --bezel: #101416;
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1416; --panel: #152024; --ink: #e2ebeb; --muted: #95a7a9; --line: #273739; --chip: #1c2a2d;
+    --accent: #47bdcb; --accent-ink: #061114; --warn: #e0a54b; --bad: #ee7c64; --ok: #6cc690;
+    --stage-1: #253332; --stage-2: #0b1012;
+    --app-bg: #0d1517; --app-card: #172326; --app-ink: #e3ecec; --app-muted: #93a6a8; --app-line: #26363a;
+    --water: #6f8cff; --amber: #f0ab3c; --off: #f07a62; --bezel: #000000;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1416; --panel: #152024; --ink: #e2ebeb; --muted: #95a7a9; --line: #273739; --chip: #1c2a2d;
+  --accent: #47bdcb; --accent-ink: #061114; --warn: #e0a54b; --bad: #ee7c64; --ok: #6cc690;
+  --stage-1: #253332; --stage-2: #0b1012;
+  --app-bg: #0d1517; --app-card: #172326; --app-ink: #e3ecec; --app-muted: #93a6a8; --app-line: #26363a;
+  --water: #6f8cff; --amber: #f0ab3c; --off: #f07a62; --bezel: #000000;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(28px, 4vw, 40px); } h2 { font-size: 26px; } h3 { font-size: 19px; }
+p { margin: 0; }
+.eyebrow { font: 600 12px/1 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.num, .mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.top { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: end; justify-content: space-between; }
+.top .intro { display: grid; gap: 8px; max-width: 66ch; min-width: 0; }
+.top .lede { color: var(--muted); }
+.sizes { display: flex; gap: 10px; margin: 0; flex-wrap: wrap; }
+.sizes div { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); min-width: 150px; }
+.sizes dt { font: 600 11px/1.2 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.sizes dd { margin: 4px 0 0; font: 600 20px/1.1 var(--f-mono); color: var(--accent); }
+
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) 372px; gap: 16px; align-items: start; }
+@media (max-width: 980px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.stage-col { display: grid; gap: 10px; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.toolbar .label { font: 600 11px/1 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel); }
+.seg button, .chip { font: 600 13px/1 var(--f-body); color: var(--ink); background: transparent; border: 0; padding: 9px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.chip { border: 1px solid var(--line); border-radius: 999px; background: var(--panel); padding: 7px 12px; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stage { position: relative; height: clamp(420px, 66vh, 720px); border-radius: 8px; overflow: hidden; border: 1px solid var(--line);
+  background: radial-gradient(120% 90% at 50% 30%, var(--stage-1), var(--stage-2)); touch-action: none; }
+@media (max-width: 600px) { .stage { height: 58vh; min-height: 340px; } }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.stage-msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--muted); }
+.tip { position: absolute; pointer-events: none; font: 600 13px/1.2 var(--f-body); color: var(--accent-ink); background: var(--accent);
+  padding: 5px 8px; border-radius: 4px; transform: translate(12px, -130%); white-space: nowrap; }
+.stage-note { position: absolute; left: 12px; bottom: 10px; right: 12px; font: 400 12px/1.3 var(--f-body); color: var(--muted); pointer-events: none; }
+.info { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; }
+.info .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+.info .meta b { color: var(--ink); font-weight: 600; }
+
+/* ---------- Phone ---------- */
+.phone-col { display: grid; gap: 12px; justify-items: center; min-width: 0; }
+.phone { width: min(360px, 100%); aspect-ratio: 360 / 740; max-height: 760px; background: var(--bezel); border-radius: 46px; padding: 11px;
+  box-shadow: 0 0 0 1px #2a3236, 0 18px 40px rgba(0,0,0,.18); position: relative; }
+.screen { position: relative; height: 100%; border-radius: 36px; overflow: hidden; background: var(--app-bg); color: var(--app-ink);
+  display: grid; grid-template-rows: auto 1fr; font-size: 14px; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 22px 6px; font: 600 13px/1 var(--f-body); }
+.notch { position: absolute; top: 9px; left: 50%; width: 92px; height: 24px; transform: translateX(-50%); background: var(--bezel); border-radius: 14px; }
+.app { overflow-y: auto; padding: 4px 14px 16px; display: grid; gap: 10px; align-content: start; scrollbar-width: none; }
+.app::-webkit-scrollbar { display: none; }
+.app-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-top: 6px; }
+.app-head h2 { font-size: 24px; }
+.pill { font: 600 11px/1 var(--f-body); padding: 5px 8px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); white-space: nowrap; }
+.card { background: var(--app-card); border: 1px solid var(--app-line); border-radius: 18px; padding: 14px; display: grid; gap: 10px; }
+.valve-card { gap: 12px; }
+.valve-top { display: flex; gap: 12px; align-items: center; }
+.valve-icon { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: color-mix(in srgb, var(--state) 14%, transparent); flex: none; }
+.valve-icon svg { width: 34px; height: 34px; }
+.valve-state { display: grid; gap: 2px; min-width: 0; }
+.valve-state b { font: 700 22px/1.05 var(--f-display); letter-spacing: .01em; color: var(--state); }
+.valve-state small { color: var(--app-muted); font-size: 12.5px; }
+.big-btn { width: 100%; border: 0; border-radius: 14px; padding: 13px; font: 700 15px/1 var(--f-body); cursor: pointer; color: #fff; background: var(--off); }
+.big-btn.on { background: var(--water); }
+.big-btn:disabled { opacity: .55; cursor: default; }
+.progress { height: 6px; border-radius: 3px; background: var(--app-line); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--state, var(--water)); transition: width .4s; }
+.usage { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.usage b { font: 600 22px/1 var(--f-mono); }
+.usage small { color: var(--app-muted); font-size: 12px; }
+.taps { display: grid; gap: 0; }
+.tap { display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; align-items: center; padding: 10px 2px; border-top: 1px solid var(--app-line); }
+.tap:first-child { border-top: 0; }
+.halo-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--app-line); box-shadow: 0 0 0 3px color-mix(in srgb, var(--h, transparent) 22%, transparent); }
+.tap .nm { display: grid; gap: 1px; min-width: 0; }
+.tap .nm b { font-weight: 600; font-size: 14px; }
+.tap .nm small { color: var(--app-muted); font-size: 12px; }
+.tap .fl { text-align: right; display: grid; gap: 1px; }
+.tap .fl b { font: 600 14px/1.1 var(--f-mono); }
+.tap .fl small { color: var(--app-muted); font: 400 11.5px/1.1 var(--f-mono); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.row span { font-size: 13.5px; }
+.row small { display: block; color: var(--app-muted); font-size: 12px; }
+.switch { width: 42px; height: 24px; border-radius: 12px; border: 0; background: var(--app-line); position: relative; cursor: pointer; flex: none; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.switch[aria-checked="true"] { background: var(--accent); }
+.switch[aria-checked="true"]::after { transform: translateX(18px); }
+.log { display: grid; gap: 6px; font-size: 12.5px; }
+.log li { display: grid; grid-template-columns: 52px 1fr; gap: 8px; color: var(--app-muted); }
+.log li b { color: var(--app-ink); font-weight: 600; }
+.log ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.alert { position: absolute; left: 10px; right: 10px; top: 40px; z-index: 5; background: var(--app-card); border: 1px solid var(--app-line);
+  border-radius: 20px; padding: 14px; display: grid; gap: 10px; box-shadow: 0 12px 30px rgba(0,0,0,.22); transform: translateY(-140%); transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+.alert.show { transform: none; }
+.alert .t { display: flex; gap: 10px; align-items: start; }
+.alert .t i { width: 30px; height: 30px; border-radius: 9px; flex: none; display: grid; place-items: center; background: color-mix(in srgb, var(--amber) 20%, transparent); color: var(--amber); font: 700 17px/1 var(--f-body); font-style: normal; }
+.alert .t b { display: block; font-size: 14.5px; }
+.alert .t p { font-size: 12.5px; color: var(--app-muted); }
+.alert .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.alert .acts button { border: 0; border-radius: 12px; padding: 10px; font: 700 13.5px/1 var(--f-body); cursor: pointer; }
+.alert .acts .danger { background: var(--off); color: #fff; }
+.alert .acts .ghost { background: var(--app-line); color: var(--app-ink); }
+.alert .cd { font: 600 12px/1 var(--f-mono); color: var(--amber); }
+.scen { width: min(360px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
+.scen .btns { display: grid; gap: 8px; }
+.scen button { text-align: left; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; padding: 10px 12px; cursor: pointer; font: 600 14px/1.25 var(--f-body); display: grid; gap: 2px; }
+.scen button small { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+.scen button:hover { border-color: var(--accent); }
+.scen .clock { font: 400 12.5px/1.3 var(--f-body); color: var(--muted); }
+
+/* ---------- Report ---------- */
+.report { display: grid; gap: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 22px; }
+.report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 22px 32px; }
+.report section { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.report ul, .report ol { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+th { text-align: left; font: 600 11px/1.2 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.mono { font-size: 12.5px; white-space: nowrap; }
+.foot { color: var(--muted); font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { .alert { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="intro">
+      <span class="eyebrow">La Trobe Grand Challenge 2026 · Valve box</span>
+      <h1>HydroTrack valve box</h1>
+      <p class="lede">The box on the main pipe that shuts the whole house’s water from your phone. Every part is at its real size and checked against every other part. Try the phone on the right: the valve in the 3D view moves with it.</p>
+    </div>
+    <dl class="sizes">
+      <div><dt>Box</dt><dd>101 × 117 × 40 mm</dd></div>
+      <div><dt>Valve</dt><dd>¾" DN20 · 12 V</dd></div>
+    </dl>
+  </header>
+
+  <main class="bench">
+    <div class="stage-col">
+      <div class="toolbar" role="group" aria-label="View">
+        <span class="label">View</span>
+        <div class="seg" id="modeSeg">
+          <button type="button" id="mode-assembled" data-mode="assembled" aria-pressed="true">Assembled</button>
+          <button type="button" id="mode-xray" data-mode="xray" aria-pressed="false">X-ray</button>
+          <button type="button" id="mode-exploded" data-mode="exploded" aria-pressed="false">Exploded</button>
+        </div>
+        <div class="seg" id="focusSeg">
+          <button type="button" id="focus-all" data-focus="all" aria-pressed="true">Whole setup</button>
+          <button type="button" id="focus-box" data-focus="box" aria-pressed="false">Box</button>
+          <button type="button" id="focus-valve" data-focus="valve" aria-pressed="false">Valve</button>
+        </div>
+      </div>
+      <div class="stage" id="stage">
+        <div class="tip" id="tip" hidden></div>
+        <div class="stage-msg" id="loading">Loading the parts…</div>
+        <div class="stage-note" id="stageNote">Drag to orbit · scroll to zoom · click a part · click the box’s round button to close the water by hand</div>
+      </div>
+      <div class="info" id="info" aria-live="polite"></div>
+    </div>
+
+    <aside class="phone-col" aria-label="HydroTrack app simulation">
+      <div class="phone">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="statusbar"><span class="num" id="sbClock">6:00</span><span aria-hidden="true">▂▄▆ ◔</span></div>
+          <div class="alert" id="alert" role="alertdialog" aria-labelledby="alertTitle">
+            <div class="t"><i>!</i><div><b id="alertTitle">Kitchen tap left open</b><p id="alertBody"></p></div></div>
+            <div class="acts"><button type="button" class="danger" id="alertClose">Close water</button><button type="button" class="ghost" id="alertIgnore">It’s me</button></div>
+            <span class="cd" id="alertCd"></span>
+          </div>
+          <div class="app" id="app">
+            <div class="app-head"><h2>Home</h2><span class="pill" id="online">Valve box online</span></div>
+            <div class="card valve-card" id="valveCard">
+              <div class="valve-top">
+                <div class="valve-icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4" style="color:var(--state)"><path d="M4 22h10M26 22h10"/><circle cx="20" cy="22" r="7"/><path id="valveGlyph" d="M20 15v-6M15 9h10"/><path id="valveBar" d="M14 22h12"/></svg></div>
+                <div class="valve-state"><b id="vsTitle">Water is on</b><small id="vsSub">Main valve open · ¾" pipe</small></div>
+              </div>
+              <div class="progress" id="vsProgress" hidden><i id="vsBar" style="width:0%"></i></div>
+              <button type="button" class="big-btn" id="valveBtn">Close water</button>
+            </div>
+            <div class="card">
+              <div class="usage"><div><small>Today</small><br><b id="uToday">0 L</b></div><small id="uTarget">of 450 L · 3 people × 150 L</small></div>
+              <div class="progress"><i id="uBar" style="width:0%;background:var(--accent)"></i></div>
+            </div>
+            <div class="card"><div class="taps" id="taps"></div></div>
+            <div class="card">
+              <div class="row"><div><span>Close after 2 min with nobody using it</span><small>A tap left open when supply comes back</small></div><button type="button" class="switch" id="swAuto" role="switch" aria-checked="true" aria-label="Auto-close"></button></div>
+              <div class="row"><div><span>Away mode</span><small>Shut the water if anything runs</small></div><button type="button" class="switch" id="swAway" role="switch" aria-checked="false" aria-label="Away mode"></button></div>
+            </div>
+            <div class="card log"><b style="font-size:13.5px">Activity</b><ol id="log"></ol></div>
+          </div>
+        </div>
+      </div>
+      <div class="scen">
+        <h3>Try a scenario</h3>
+        <div class="btns">
+          <button type="button" id="sc-kitchen">Kitchen tap on / off<small>Normal use: flow shows on the phone and the pipe</small></button>
+          <button type="button" id="sc-leftopen">Supply returns, tap left open<small>Nobody is at the tap. Watch the alert, then the valve shut.</small></button>
+          <button type="button" id="sc-away">Away mode: water starts<small>The house is empty and a tap starts running</small></button>
+          <button type="button" id="sc-reset">Reset<small>Water on, all taps off, 6:00 AM</small></button>
+        </div>
+        <p class="clock">Demo clock runs 30× faster than real time. A real valve takes about 5 seconds to turn; here it takes 2.</p>
+      </div>
+    </aside>
+  </main>
+
+  <section class="report" aria-labelledby="repTitle">
+    <div class="eyebrow">Build report</div>
+    <h2 id="repTitle">What’s in the box and how it closes the water</h2>
+    <div class="report-grid">
+      <section>
+        <h3>What happens when you press Close water</h3>
+        <ol>
+          <li>The phone sends the command over home Wi-Fi to the box’s ESP32.</li>
+          <li>The ESP32 switches relay 1, which sends 12 V down the valve’s control wire.</li>
+          <li>The valve motor turns the ball 90° in about 5 seconds, then its own switch cuts the motor.</li>
+          <li>The valve’s feedback wire tells the ESP32 it is fully shut. Only then does the phone say “Water is off”.</li>
+          <li>The box’s halo turns red, and every tap device reports zero flow.</li>
+        </ol>
+      </section>
+      <section>
+        <h3>Joining it to the pipe</h3>
+        <ul>
+          <li>Fit it on the main pipe after the meter or tank outlet, so it controls the whole house.</li>
+          <li>Solvent-weld a ¾" CPVC male threaded adapter (MTA) on each pipe end. Wrap the brass threads with PTFE tape and screw them into the valve.</li>
+          <li>Put a CPVC union on one side, so the valve can come out without cutting the pipe.</li>
+          <li>Keep the actuator on top, and the arrow on the valve body pointing with the flow.</li>
+          <li>Run the valve cable behind the pipe and down to the box, with a drip loop under it.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Safety and power cuts</h3>
+        <ul>
+          <li>Only 12 V goes inside the box. The adapter plugs into a normal socket.</li>
+          <li>In a power cut the valve stays where it was. The red knob on top turns it by hand.</li>
+          <li>The box’s round button closes or opens the water with no phone or internet.</li>
+          <li>If Wi-Fi drops, the ESP32 still hears the tap devices over ESP-NOW and can still close the water.</li>
+        </ul>
+      </section>
+    </div>
+
+    <section aria-labelledby="partsTitle" style="display:grid;gap:10px">
+      <h3 id="partsTitle">Parts to buy</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Part</th><th>Size</th><th>Approx. price</th></tr></thead>
+        <tbody id="partsBody"></tbody>
+      </table></div>
+      <p class="foot">Total about ₹2,500–4,000 with the valve. Prices are rough Indian retail; check before buying. Measure the valve and relay module when you have them, then change the numbers in make_box_parts.py and run it again.</p>
+    </section>
+
+    <section aria-labelledby="wireTitle" style="display:grid;gap:10px">
+      <h3 id="wireTitle">Wiring</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>From</th><th>To</th><th>Wire</th></tr></thead>
+        <tbody>
+          <tr><td>12 V jack +</td><td>Step-down IN+, relay 1 COM, terminal 1 (valve yellow)</td><td>22 AWG red</td></tr>
+          <tr><td>12 V jack −</td><td>Step-down IN−, terminal 2 (valve blue)</td><td>22 AWG black</td></tr>
+          <tr><td>Relay 1 NO</td><td>Valve red (control)</td><td>22 AWG red</td></tr>
+          <tr><td>Step-down OUT 5 V / GND</td><td>ESP32 VIN / GND, relay VCC / GND, LED ring 5 V / GND</td><td>Jumper wires</td></tr>
+          <tr><td>ESP32 GPIO 26 / 27</td><td>Relay IN1 / IN2</td><td>Jumper wires</td></tr>
+          <tr><td>ESP32 GPIO 32 / 33</td><td>Terminals 4 / 5 (valve green = open, white = closed)</td><td>Jumper wires, pull-ups on</td></tr>
+          <tr><td>ESP32 GPIO 13</td><td>LED ring DIN</td><td>Jumper wire</td></tr>
+          <tr><td>ESP32 GPIO 14</td><td>Button (other leg to GND)</td><td>Jumper wire</td></tr>
+        </tbody>
+      </table></div>
+      <p class="foot">Wire colours differ between valve makers. Check the label on yours: CR05-type valves usually use yellow for +12 V, blue for ground and red for control.</p>
+    </section>
+
+    <section aria-labelledby="printTitle" style="display:grid;gap:10px">
+      <h3 id="printTitle">The four printed parts</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>File</th><th>Part</th><th>Filament</th><th>Lay it on the bed</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">01_box_body.stl</td><td>Body</td><td>White PETG, 3 walls, 15% infill</td><td>Back down</td></tr>
+          <tr><td class="mono">02_box_cover.stl</td><td>Front cover</td><td>White PETG, 3 walls</td><td>Front face down</td></tr>
+          <tr><td class="mono">03_halo_ring.stl</td><td>Halo ring</td><td>Natural (clear) PETG, 100% infill</td><td>Flange down</td></tr>
+          <tr><td class="mono">04_button_cap.stl</td><td>Button cap</td><td>White PETG</td><td>Flange down</td></tr>
+        </tbody>
+      </table></div>
+      <p class="foot">No supports needed. About 107 cm³, roughly 135 g of filament. Files and the build guide are in the project’s valve-box folder.</p>
+    </section>
+  </section>
+</div>
+
+<script src="valvebox-model.js" charset="utf-8"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const HV = window.HydroTrackValve;
+const $ = (id) => document.getElementById(id);
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- Parts table ----------
+for (const p of HV.PARTS) if (p.price) $('partsBody').insertAdjacentHTML('beforeend', `<tr><td>${p.name}</td><td class="mono">${p.size}</td><td class="num">${p.price}</td></tr>`);
+for (const [n, s, pr] of [['M3 × 12 self-tapping screws (4) + M3 × 6 (4)', 'Cover and relay', '₹20'], ['12 V 1 A DC adapter', '5.5 × 2.1 mm plug', '₹200–300'], ['Jumper wires, 22 AWG wire, PTFE tape, CPVC cement', '', '₹100']])
+  $('partsBody').insertAdjacentHTML('beforeend', `<tr><td>${n}</td><td class="mono">${s}</td><td class="num">${pr}</td></tr>`);
+
+// ---------- Info strip ----------
+const info = $('info');
+function showInfo(p) {
+  if (!p) { info.innerHTML = `<span class="eyebrow">Click a part</span><p>The valve sits on the ¾" main pipe; the box hangs on the wall below it. X-ray shows inside the box and the valve’s ball, Exploded pulls the box apart.</p>`; return; }
+  info.innerHTML = `<span class="eyebrow">${p.group}</span><h3>${p.name}</h3><div class="meta">${p.size ? `<span>Size <b class="mono">${p.size}</b></span>` : ''}${p.price ? `<span>Price <b>${p.price}</b></span>` : ''}${p.printed ? '<span><b>3D printed</b></span>' : ''}</div><p>${p.note}</p>`;
+}
+showInfo(null);
+
+// ---------- Scene ----------
+const stage = $('stage');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
+catch (e) { $('loading').textContent = 'This browser can’t show 3D (WebGL is off). The phone simulation still works.'; }
+let model = null, scene, camera, controls;
+const xrayMeshes = [];
+if (renderer) {
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+  stage.prepend(renderer.domElement);
+  scene = new THREE.Scene();
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(renderer), 0.04).texture;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.4); key.position.set(200, 400, 500); scene.add(key);
+  camera = new THREE.PerspectiveCamera(30, 1, 1, 8000);
+  controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.minDistance = 80; controls.maxDistance = 2200;
+  try {
+    const res = await fetch('print/stl-bundle.json'); if (!res.ok) throw new Error('bundle ' + res.status);
+    const bundle = await res.json();
+    const bytes = async (p) => Uint8Array.from(atob(bundle[p.replace('print/', '')]), (c) => c.charCodeAt(0)).buffer;
+    const assets = await HV.loadAssets(THREE, STLLoader, toCreasedNormals, bytes, 'print/');
+    model = HV.build(THREE, assets);
+    scene.add(model.root);
+    $('loading').remove();
+  } catch (e) { $('loading').textContent = 'The 3D parts didn’t load. Reload to try again; the phone simulation still works.'; }
+}
+const haloLight = new THREE.PointLight(0x2a55ff, 0, 140, 0);
+if (model) {
+  const [hx, hy] = model.layout.HALO_C;
+  haloLight.position.set(HV.BOX_AT[0] + hx, HV.BOX_AT[1] + hy, 60); scene.add(haloLight);
+  // X-ray: box body + cover + valve brass/actuator go see-through
+  const fade = { body: 0.14, cover: 0.12, valve: 0.22 };
+  for (const [id, a] of Object.entries(fade)) model.parts[id].traverse((o) => {
+    if (!o.isMesh || o.parent === model.anim.ball || o.parent === model.anim.knob) return;
+    o.material = o.material.clone(); o.material.userData.base = o.material.opacity; o.userData.xa = a; xrayMeshes.push(o);
+  });
+}
+const VIEWS = {
+  all: { target: [10, 140, 20], pos: [260, 300, 760] },
+  box: { target: [-80, 88, 18], pos: [40, 150, 300] },
+  valve: { target: [60, 240, 40], pos: [190, 330, 300] },
+};
+function goView(name) {
+  if (!camera) return;
+  const v = VIEWS[name]; controls.target.set(...v.target); camera.position.set(...v.pos); controls.update();
+  document.querySelectorAll('#focusSeg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.focus === name)));
+}
+$('focusSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) goView(b.dataset.focus); });
+
+const view = { mode: 'assembled', explode: 0, target: 0 };
+function setMode(m) {
+  view.mode = m; view.target = m === 'exploded' ? 1 : 0;
+  document.querySelectorAll('#modeSeg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  for (const o of xrayMeshes) {
+    const k = m === 'xray' ? o.userData.xa : 1;
+    o.material.transparent = k < 1 || o.material.userData.base < 1; o.material.opacity = (o.material.userData.base ?? 1) * k;
+    o.material.depthWrite = k >= 1; o.material.needsUpdate = true;
+  }
+  if (m === 'exploded' && camera) goView('box');
+}
+$('modeSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
+function applyExplode(t) {
+  if (!model) return;
+  for (const p of HV.PARTS) { const g = model.parts[p.id]; if (!g) continue; const e = p.explode || [0, 0, 0]; g.position.set(e[0] * t, e[1] * t, e[2] * t); }
+  model.parts.wires.visible = t < 0.02;
+}
+
+// ---------- Picking ----------
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), tip = $('tip');
+function pick(ev) {
+  if (!model) return null;
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const t = []; model.root.traverse((o) => { if (o.isMesh && !o.userData.flow) t.push(o); });
+  for (const h of ray.intersectObjects(t, false)) {
+    if (view.mode === 'xray' && h.object.userData.xa) continue;
+    let n = h.object; while (n && !n.userData.partId) n = n.parent;
+    if (n && n.visible) return n.userData.partId;
+  }
+  return null;
+}
+if (renderer) {
+  let down = null, hoverEv = null;
+  renderer.domElement.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; });
+  renderer.domElement.addEventListener('pointerup', (e) => {
+    if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5) {
+      const id = pick(e);
+      if (id === 'button') { pressBoxButton(); return; }
+      showInfo(id ? HV.PARTS.find((p) => p.id === id) : null);
+    }
+    down = null;
+  });
+  renderer.domElement.addEventListener('pointermove', (e) => { hoverEv = e.buttons ? null : e; });
+  renderer.domElement.addEventListener('pointerleave', () => { hoverEv = null; tip.hidden = true; });
+  window.__hover = () => {
+    if (!hoverEv) return; const id = pick(hoverEv); const r = stage.getBoundingClientRect();
+    if (id) { tip.textContent = id === 'button' ? 'Box button: press to close / open' : HV.PARTS.find((p) => p.id === id).name;
+      tip.style.left = (hoverEv.clientX - r.left) + 'px'; tip.style.top = (hoverEv.clientY - r.top) + 'px'; tip.hidden = false; renderer.domElement.style.cursor = 'pointer'; }
+    else { tip.hidden = true; renderer.domElement.style.cursor = 'grab'; }
+    hoverEv = null;
+  };
+}
+
+// =====================================================================
+//  Simulation
+// =====================================================================
+const TAPS = [
+  { id: 'kitchen', name: 'Kitchen', profile: 'Kitchen · 10 L per use', rate: 6.0 },
+  { id: 'basin', name: 'Bathroom basin', profile: 'Basin · 3 L per use', rate: 4.0 },
+  { id: 'wash', name: 'Wash area', profile: 'Bucket · 20 L per use', rate: 8.0 },
+];
+const SPEED = 30;                           // demo seconds per real second
+const S = {};
+function reset() {
+  Object.assign(S, { clock: 6 * 3600, valve: 'open', angle: 0, today: 0, auto: true, away: false, alert: null, unattended: 0, scenario: null, log: [] });
+  for (const t of TAPS) Object.assign(t, { open: false, used: 0, useStart: 0, attended: true });
+  $('swAuto').setAttribute('aria-checked', 'true'); $('swAway').setAttribute('aria-checked', 'false');
+  hideAlert(); log('Valve box online', 'Water on');
+}
+const fmt = (s) => { const h = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60; return `${h}:${String(m).padStart(2, '0')}`; };
+function log(what, detail) { S.log.unshift([fmt(S.clock), what, detail]); S.log = S.log.slice(0, 6); renderLog(); }
+function renderLog() { $('log').innerHTML = S.log.map(([t, w, d]) => `<li><span class="num">${t}</span><span><b>${w}</b>${d ? ' · ' + d : ''}</span></li>`).join(''); }
+function totalFlow() { return S.valve === 'open' ? TAPS.reduce((a, t) => a + (t.open ? t.rate : 0), 0) : 0; }
+
+function setValve(target, why) {
+  if ((target === 'closed' && (S.valve === 'closed' || S.valve === 'closing')) || (target === 'open' && (S.valve === 'open' || S.valve === 'opening'))) return;
+  S.valve = target === 'closed' ? 'closing' : 'opening';
+  S.why = why;
+  flashBox();
+  hideAlert();
+  render();
+}
+function finishValve() {
+  if (S.valve === 'closing') {
+    S.valve = 'closed';
+    const saved = TAPS.filter((t) => t.open).length ? ' · water stopped' : '';
+    log('Water off', (S.why || 'closed') + saved);
+    for (const t of TAPS) if (t.open && !t.attended) { t.open = false; }
+  } else if (S.valve === 'opening') { S.valve = 'open'; log('Water on', S.why || 'opened'); }
+  render();
+}
+let flashUntil = 0;
+function flashBox() { flashUntil = performance.now() + 700; }
+
+function showAlert(title, body) {
+  S.alert = { title, body, left: 120 };
+  $('alertTitle').textContent = title; $('alertBody').textContent = body; $('alert').classList.add('show');
+}
+function hideAlert() { S.alert = null; $('alert').classList.remove('show'); }
+
+function pressBoxButton() {
+  if (S.valve === 'open' || S.valve === 'opening') setValve('closed', 'box button pressed');
+  else setValve('open', 'box button pressed');
+}
+
+// ---------- Rendering the app ----------
+function render() {
+  const card = $('valveCard'), btn = $('valveBtn');
+  const st = { open: ['Water is on', 'Main valve open · ¾" pipe', 'var(--water)'], closing: ['Closing…', 'Valve turning 90°', 'var(--amber)'],
+    closed: ['Water is off', 'Main valve shut', 'var(--off)'], opening: ['Opening…', 'Valve turning back', 'var(--amber)'] }[S.valve];
+  $('vsTitle').textContent = st[0]; $('vsSub').textContent = st[1]; card.style.setProperty('--state', st[2]);
+  const moving = S.valve === 'closing' || S.valve === 'opening';
+  $('vsProgress').hidden = !moving;
+  btn.disabled = moving;
+  btn.textContent = S.valve === 'open' || S.valve === 'closing' ? 'Close water' : 'Turn water on';
+  btn.className = 'big-btn' + (S.valve === 'closed' || S.valve === 'opening' ? ' on' : '');
+  $('valveBar').setAttribute('d', S.valve === 'closed' ? 'M20 16v12' : 'M14 22h12');
+  const flow = totalFlow();
+  $('taps').innerHTML = TAPS.map((t) => {
+    const f = t.open && S.valve === 'open' ? t.rate : 0;
+    const limit = t.id === 'kitchen' ? 10 : t.id === 'basin' ? 3 : 20;
+    const col = !f ? '' : t.used > limit ? 'var(--off)' : t.used > limit * 0.75 ? 'var(--amber)' : 'var(--water)';
+    return `<div class="tap"><span class="halo-dot" style="${col ? `background:${col};--h:${col}` : ''}"></span>
+      <span class="nm"><b>${t.name}</b><small>${t.profile}</small></span>
+      <span class="fl"><b>${f ? f.toFixed(1) + ' L/min' : t.open && S.valve !== 'open' ? 'No water' : 'Off'}</b><small>${t.used.toFixed(1)} L this use</small></span></div>`;
+  }).join('');
+  $('uToday').textContent = Math.round(S.today) + ' L';
+  $('uBar').style.width = Math.min(100, S.today / 450 * 100) + '%';
+  $('sbClock').textContent = fmt(S.clock);
+}
+
+// ---------- Controls ----------
+$('valveBtn').addEventListener('click', () => setValve(S.valve === 'open' ? 'closed' : 'open', 'from the app'));
+$('alertClose').addEventListener('click', () => setValve('closed', 'from the alert'));
+$('alertIgnore').addEventListener('click', () => { for (const t of TAPS) t.attended = true; S.unattended = 0; hideAlert(); log('Alert dismissed', 'someone is using the tap'); });
+for (const id of ['swAuto', 'swAway']) $(id).addEventListener('click', (e) => {
+  const on = e.currentTarget.getAttribute('aria-checked') !== 'true'; e.currentTarget.setAttribute('aria-checked', String(on));
+  if (id === 'swAuto') S.auto = on; else { S.away = on; log(on ? 'Away mode on' : 'Away mode off'); }
+});
+$('sc-kitchen').addEventListener('click', () => {
+  const k = TAPS[0];
+  if (S.valve !== 'open') setValve('open', 'demo');
+  k.open = !k.open; k.attended = true; if (k.open) k.used = 0;
+  log(k.open ? 'Kitchen tap on' : 'Kitchen tap off'); render();
+});
+$('sc-leftopen').addEventListener('click', () => {
+  reset(); S.clock = 6 * 3600 + 120;
+  const k = TAPS[0]; k.open = true; k.attended = false; k.used = 0; S.unattended = 0;
+  log('Supply returned', 'kitchen tap was left open'); render();
+});
+$('sc-away').addEventListener('click', () => {
+  reset(); S.away = true; $('swAway').setAttribute('aria-checked', 'true'); S.clock = 13 * 3600 + 5 * 60;
+  log('Away mode on', 'house empty');
+  setTimeout(() => { const b = TAPS[1]; b.open = true; b.attended = false; b.used = 0; log('Water started', 'bathroom basin'); render(); }, 900);
+  render();
+});
+$('sc-reset').addEventListener('click', () => { reset(); render(); });
+
+// ---------- Main loop ----------
+reset(); render();
+const clock = new THREE.Clock();
+let last = performance.now(), arrowPhase = 0;
+function tick() {
+  const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now;
+  // demo time
+  S.clock += dt * SPEED;
+  const flowing = S.valve === 'open';
+  for (const t of TAPS) if (t.open && flowing) { const l = t.rate * dt * SPEED / 60; t.used += l; S.today += l; }
+  // unattended tap: alert after 3 demo minutes, auto-close after 2 more
+  const unattended = TAPS.find((t) => t.open && !t.attended);
+  if (unattended && flowing) {
+    if (S.away) { setValve('closed', 'away mode: water ran with nobody home'); showAway(unattended); }
+    else {
+      S.unattended += dt * SPEED;
+      if (S.unattended > 180 && !S.alert) showAlert(`${unattended.name} tap left open`, `Water came back and this tap has run for 3 min with nobody using it. ${unattended.used.toFixed(0)} L so far.`);
+      if (S.alert) {
+        S.alert.left -= dt * SPEED;
+        $('alertCd').textContent = S.auto ? `Closing automatically in ${Math.max(0, Math.ceil(S.alert.left))} s` : 'Auto-close is off';
+        $('alertBody').textContent = `Water came back and this tap has run with nobody using it. ${unattended.used.toFixed(0)} L so far.`;
+        if (S.auto && S.alert.left <= 0) setValve('closed', 'auto-closed: tap left open');
+      }
+    }
+  }
+  // valve motion (2 s real for the demo)
+  if (S.valve === 'closing' || S.valve === 'opening') {
+    S.angle = Math.min(1, Math.max(0, S.angle + (S.valve === 'closing' ? 1 : -1) * dt / 2));
+    $('vsBar').style.width = (S.valve === 'closing' ? S.angle : 1 - S.angle) * 100 + '%';
+    if ((S.valve === 'closing' && S.angle >= 1) || (S.valve === 'opening' && S.angle <= 0)) finishValve();
+  }
+  // 3D
+  if (model) {
+    if (Math.abs(view.explode - view.target) > 0.001) { view.explode += (view.target - view.explode) * Math.min(1, dt * 6); applyExplode(view.explode); }
+    const a = S.angle * Math.PI / 2;
+    model.anim.ball.rotation.y = a; model.anim.knob.rotation.y = a;
+    const f = totalFlow(); arrowPhase = (arrowPhase + dt * f * (reduceMotion ? 2 : 6)) % 30;
+    const arrows = model.anim.arrows;
+    arrows.forEach((m, i) => { const x = -250 + i * 30 + arrowPhase; m.position.x = x; m.visible = f > 0 && x < 420 && view.explode < 0.05; });
+    // halo colour
+    let col = '#2a55ff', k = f > 0 ? 1 : 0.55;
+    if (S.valve === 'closed') col = '#ff2a1a';
+    else if (S.valve === 'closing' || S.valve === 'opening') { col = '#ffa500'; k = 0.5 + 0.5 * Math.sin(now / 120); }
+    else if (S.alert) { col = '#ffa500'; k = 0.3 + 0.7 * (Math.sin(now / 300) + 1) / 2; }
+    if (now < flashUntil) { col = '#2fd17a'; k = 1; }
+    const M = model.materials;
+    M.haloMat.emissive.set(col); M.haloMat.emissiveIntensity = 0.15 + 1.6 * k;
+    M.haloLed.emissive.set(col); M.haloLed.emissiveIntensity = 0.2 + 2.6 * k;
+    haloLight.color.set(col); haloLight.intensity = 0.4 + 2.2 * k;
+    controls.update();
+    window.__hover?.();
+    renderer.render(scene, camera);
+  }
+  render();
+  requestAnimationFrame(tick);
+}
+function showAway(t) {
+  showAlert('Water shut: away mode', `${t.name} started running while nobody was home, so the valve closed straight away.`);
+  $('alertCd').textContent = 'Closed automatically';
+  S.alert.left = Infinity;
+}
+function resize() {
+  if (!renderer) return;
+  const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.fov = w < 560 ? 42 : 30; camera.updateProjectionMatrix();
+}
+if (renderer) { new ResizeObserver(resize).observe(stage); resize(); goView('all'); }
+window.hydrovalve = { S, model, setValve, goView, setMode, camera, controls };
+requestAnimationFrame(tick);
+</script>
