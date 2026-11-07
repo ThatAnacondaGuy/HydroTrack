@@ -63,7 +63,7 @@ different, change it at the top of `print/make_box_parts.py` and run
 |---|---|
 | 12 V jack + | Step-down IN+, relay 1 COM, terminal 1 → valve yellow (+12 V) |
 | 12 V jack − | Step-down IN−, terminal 2 → valve blue (ground) |
-| Relay 1 NO | Valve red (control) |
+| Relay 1 NC | Valve red (control). NC means the water stays on if the box restarts |
 | Step-down 5 V / GND | ESP32 VIN / GND, relay VCC / GND, LED ring 5 V / GND |
 | ESP32 GPIO 26 / 27 | Relay IN1 / IN2 |
 | ESP32 GPIO 32 / 33 | Terminals 4 / 5 → valve green (open) / white (closed) feedback |
@@ -71,7 +71,8 @@ different, change it at the top of `print/make_box_parts.py` and run
 | ESP32 GPIO 14 | Button (other leg to GND) |
 
 Valve wire colours differ between makers. Check the label on yours before
-connecting anything.
+connecting anything. The firmware is in `firmware/valve_box/`; its README
+explains the settings for NO wiring and for 3-wire valves.
 
 ## What was checked
 

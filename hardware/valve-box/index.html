@@ -252,7 +252,7 @@ td.mono { font-size: 12.5px; white-space: nowrap; }
         <h3>What happens when you press Close water</h3>
         <ol>
           <li>The phone sends the command over home Wi-Fi to the box’s ESP32.</li>
-          <li>The ESP32 switches relay 1, which sends 12 V down the valve’s control wire.</li>
+          <li>The ESP32 switches relay 1, which takes the 12 V off the valve’s control wire.</li>
           <li>The valve motor turns the ball 90° in about 5 seconds, then its own switch cuts the motor.</li>
           <li>The valve’s feedback wire tells the ESP32 it is fully shut. Only then does the phone say “Water is off”.</li>
           <li>The box’s halo turns red, and every tap device reports zero flow.</li>
@@ -295,7 +295,7 @@ td.mono { font-size: 12.5px; white-space: nowrap; }
         <tbody>
           <tr><td>12 V jack +</td><td>Step-down IN+, relay 1 COM, terminal 1 (valve yellow)</td><td>22 AWG red</td></tr>
           <tr><td>12 V jack −</td><td>Step-down IN−, terminal 2 (valve blue)</td><td>22 AWG black</td></tr>
-          <tr><td>Relay 1 NO</td><td>Valve red (control)</td><td>22 AWG red</td></tr>
+          <tr><td>Relay 1 NC</td><td>Valve red (control). NC, so a restart never shuts the water</td><td>22 AWG red</td></tr>
           <tr><td>Step-down OUT 5 V / GND</td><td>ESP32 VIN / GND, relay VCC / GND, LED ring 5 V / GND</td><td>Jumper wires</td></tr>
           <tr><td>ESP32 GPIO 26 / 27</td><td>Relay IN1 / IN2</td><td>Jumper wires</td></tr>
           <tr><td>ESP32 GPIO 32 / 33</td><td>Terminals 4 / 5 (valve green = open, white = closed)</td><td>Jumper wires, pull-ups on</td></tr>
