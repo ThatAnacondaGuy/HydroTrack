@@ -1,0 +1,143 @@
+{
+ "units": "mm",
+ "parts": [
+  {
+   "id": "chamber",
+   "file": "01_chamber_cup.stl",
+   "label": "Chamber cup",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    5.2,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "lid",
+   "file": "02_chamber_lid.stl",
+   "label": "Chamber lid with G\u00bd thread",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    30.6,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "cage",
+   "file": "03_electronics_cage.stl",
+   "label": "Electronics cage",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    33.1,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "diffuser",
+   "file": "04_halo_diffuser.stl",
+   "label": "Halo diffuser (natural PETG)",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "shell",
+   "file": "05_body_shell.stl",
+   "label": "Body shell",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    0.0,
+    101.7,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "cap",
+   "file": "06_outlet_cap.stl",
+   "label": "Outlet cap (holds the insert)",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  }
+ ]
+}

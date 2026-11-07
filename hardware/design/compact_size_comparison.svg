@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="750" viewBox="0 0 880 500" font-family="Helvetica, Arial, sans-serif">
+<rect width="880" height="500" fill="#ffffff"/>
+<text x="440" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="#2C2C2A">How small can HydroTrack get? Drawn to scale, hanging from the tap</text>
+
+<!-- ============ NOW (centre x 120, 2.4 px per mm) ============ -->
+<rect x="90" y="44" width="60" height="36" rx="4" fill="#B4B2A9"/>
+<text x="120" y="66" text-anchor="middle" font-size="11" fill="#ffffff">tap</text>
+<rect x="93.6" y="80" width="52.8" height="14.4" fill="#888780"/>
+<rect x="43.8" y="94.4" width="152.4" height="20.4" fill="#8FA3A1"/>
+<rect x="43.8" y="114.8" width="152.4" height="152.4" fill="#6C8A8E"/>
+<rect x="43.8" y="267.2" width="152.4" height="109.2" fill="#0A7884"/>
+<rect x="43.8" y="376.4" width="152.4" height="13.2" fill="#4A6CF0"/>
+<rect x="43.8" y="94.4" width="152.4" height="295.2" rx="3" fill="none" stroke="#2C2C2A" stroke-width="1"/>
+<rect x="114" y="389.6" width="12" height="16" fill="#85B7EB"/>
+<g font-size="11" fill="#2C2C2A">
+<text x="206" y="109">Adapter + cap</text>
+<text x="206" y="178" font-weight="bold">Flow sensor 63.5 mm</text>
+<text x="206" y="192">DevKit, TP4056, TDS</text>
+<text x="206" y="206">board sit beside it</text>
+<text x="206" y="318" font-weight="bold">Chamber 45.5 mm</text>
+<text x="206" y="332">UV-C windows,</text>
+<text x="206" y="346">TDS probe, insert</text>
+<text x="206" y="387" font-weight="bold">Halo 5.5 mm</text>
+</g>
+
+<!-- ============ STEP 1 (centre x 410) ============ -->
+<rect x="380" y="44" width="60" height="36" rx="4" fill="#B4B2A9"/>
+<text x="410" y="66" text-anchor="middle" font-size="11" fill="#ffffff">tap</text>
+<rect x="383.6" y="80" width="52.8" height="14.4" fill="#888780"/>
+<rect x="344" y="94.4" width="132" height="20.4" fill="#8FA3A1"/>
+<rect x="344" y="114.8" width="132" height="152.4" fill="#6C8A8E"/>
+<rect x="344" y="267.2" width="132" height="34.8" fill="#0A7884"/>
+<rect x="344" y="302" width="132" height="13.2" fill="#4A6CF0"/>
+<rect x="344" y="94.4" width="132" height="220.8" rx="3" fill="none" stroke="#2C2C2A" stroke-width="1"/>
+<rect x="404" y="315.2" width="12" height="16" fill="#85B7EB"/>
+<g font-size="11" fill="#2C2C2A">
+<text x="486" y="109">Adapter + cap</text>
+<text x="486" y="178" font-weight="bold">Flow sensor 63.5 mm</text>
+<text x="486" y="192">XIAO + battery</text>
+<text x="486" y="206">beside it</text>
+<text x="486" y="278" font-weight="bold">Chamber + halo 20 mm</text>
+<text x="486" y="292">insert, NTC, 2 screws</text>
+</g>
+
+<!-- ============ STEP 2 (centre x 680) ============ -->
+<rect x="650" y="44" width="60" height="36" rx="4" fill="#B4B2A9"/>
+<text x="680" y="66" text-anchor="middle" font-size="11" fill="#ffffff">tap</text>
+<rect x="653.6" y="80" width="52.8" height="14.4" fill="#888780"/>
+<rect x="620" y="94.4" width="120" height="20.4" fill="#8FA3A1"/>
+<rect x="620" y="114.8" width="120" height="84" fill="#6C8A8E"/>
+<rect x="620" y="198.8" width="120" height="34.8" fill="#0A7884"/>
+<rect x="620" y="233.6" width="120" height="13.2" fill="#4A6CF0"/>
+<rect x="620" y="94.4" width="120" height="152.4" rx="3" fill="none" stroke="#2C2C2A" stroke-width="1"/>
+<rect x="674" y="246.8" width="12" height="16" fill="#85B7EB"/>
+<g font-size="11" fill="#2C2C2A">
+<text x="750" y="109">Adapter + cap</text>
+<text x="750" y="145" font-weight="bold">Own turbine ~35 mm</text>
+<text x="750" y="159">(YF-S201 rotor in</text>
+<text x="750" y="173">our own housing)</text>
+<text x="750" y="214" font-weight="bold">Chamber + halo</text>
+<text x="750" y="228">~20 mm</text>
+</g>
+
+<!-- Report target: 6 mm thread + 85 mm body = 91 mm below the tap -->
+<line x1="24" y1="298.4" x2="876" y2="298.4" stroke="#A32D2D" stroke-width="1.3" stroke-dasharray="6 4"/>
+<text x="874" y="291" text-anchor="end" font-size="11" fill="#A32D2D">report target: the 85 mm body ends here</text>
+
+<!-- Captions -->
+<g text-anchor="middle" fill="#2C2C2A">
+<text x="120" y="432" font-size="13" font-weight="bold">NOW</text>
+<text x="120" y="450" font-size="12">Ø63.5 × 129 mm</text>
+<text x="120" y="466" font-size="11" fill="#5F5E5A">as designed today</text>
+<text x="410" y="432" font-size="13" font-weight="bold">STEP 1 · about ₹1,000 of parts</text>
+<text x="410" y="450" font-size="12">≈ Ø55 × 98 mm</text>
+<text x="410" y="466" font-size="11" fill="#5F5E5A">24% shorter, ~40% less volume</text>
+<text x="680" y="432" font-size="13" font-weight="bold">STEP 2 · later</text>
+<text x="680" y="450" font-size="12">≈ Ø50 × 70 mm</text>
+<text x="680" y="466" font-size="11" fill="#5F5E5A">inside the 85 mm target</text>
+</g>
+<g font-size="11">
+<rect x="208" y="482" width="10" height="10" fill="#6C8A8E"/><text x="222" y="491" fill="#444441">flow + electronics</text>
+<rect x="330" y="482" width="10" height="10" fill="#0A7884"/><text x="344" y="491" fill="#444441">water chamber</text>
+<rect x="436" y="482" width="10" height="10" fill="#4A6CF0"/><text x="450" y="491" fill="#444441">halo</text>
+<text x="490" y="491" fill="#5F5E5A">Step 1 and 2 sizes are estimates until the CAD is redone.</text>
+</g>
+</svg>

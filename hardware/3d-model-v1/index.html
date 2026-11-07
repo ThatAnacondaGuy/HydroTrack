@@ -1,0 +1,718 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HydroTrack Real Build</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a workbench. The 3D stage with its controls on the left, a parts rail on the right,
+   and the fit report (sizes drawn to scale) underneath. */
+:root {
+  --bg: #edf1f0;
+  --panel: #ffffff;
+  --ink: #142023;
+  --muted: #586a6d;
+  --line: #d3dcdb;
+  --chip: #e5ebea;
+  --accent: #0a7884;
+  --accent-ink: #ffffff;
+  --warn: #9a620c;
+  --bad: #b23f2a;
+  --ok: #2d7a4d;
+  --stage-1: #fbfdfc;
+  --stage-2: #d5dedd;
+  --seg-halo: #4a6cf0;
+  --seg-chamber: #0a7884;
+  --seg-bay: #6c8a8e;
+  --seg-band: #b9c6c4;
+  --seg-cap: #8fa3a1;
+  --seg-extra: #c9a24c;
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1416; --panel: #152024; --ink: #e2ebeb; --muted: #95a7a9; --line: #273739; --chip: #1c2a2d;
+    --accent: #47bdcb; --accent-ink: #061114; --warn: #e0a54b; --bad: #ee7c64; --ok: #6cc690;
+    --stage-1: #253332; --stage-2: #0b1012;
+    --seg-halo: #6f8cff; --seg-chamber: #47bdcb; --seg-bay: #7d989b; --seg-band: #4b5d5f; --seg-cap: #62787a; --seg-extra: #d6b05a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1416; --panel: #152024; --ink: #e2ebeb; --muted: #95a7a9; --line: #273739; --chip: #1c2a2d;
+  --accent: #47bdcb; --accent-ink: #061114; --warn: #e0a54b; --bad: #ee7c64; --ok: #6cc690;
+  --stage-1: #253332; --stage-2: #0b1012;
+  --seg-halo: #6f8cff; --seg-chamber: #47bdcb; --seg-bay: #7d989b; --seg-band: #4b5d5f; --seg-cap: #62787a; --seg-extra: #d6b05a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 400 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(28px, 4vw, 40px); }
+h2 { font-size: 26px; }
+h3 { font-size: 19px; }
+p { margin: 0; }
+.eyebrow { font: 600 12px/1 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: end; justify-content: space-between; }
+.top .intro { display: grid; gap: 8px; max-width: 64ch; min-width: 0; }
+.top .lede { color: var(--muted); }
+.sizes { display: flex; gap: 10px; margin: 0; flex-wrap: wrap; }
+.sizes div { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); min-width: 150px; }
+.sizes dt { font: 600 11px/1.2 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.sizes dd { margin: 4px 0 0; font: 600 22px/1.1 var(--f-mono); font-variant-numeric: tabular-nums; }
+.sizes .real dd { color: var(--accent); }
+.sizes .spec dd { color: var(--bad); text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* Bench */
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+@media (max-width: 960px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.stage-col { display: grid; gap: 10px; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.toolbar .label { font: 600 11px/1 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel); flex-wrap: wrap; }
+.seg button, .chip {
+  font: 600 13px/1 var(--f-body); color: var(--ink); background: transparent; border: 0;
+  padding: 9px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+}
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.chip { border: 1px solid var(--line); border-radius: 999px; background: var(--panel); padding: 7px 12px; }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.chip[aria-pressed="true"]::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip[aria-pressed="false"]::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--muted); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.explode { display: inline-flex; align-items: center; gap: 8px; }
+.explode input { width: 140px; accent-color: var(--accent); }
+
+.stage {
+  position: relative; height: clamp(420px, 68vh, 760px); border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--line);
+  background: radial-gradient(120% 90% at 50% 30%, var(--stage-1), var(--stage-2));
+  touch-action: none;
+}
+@media (max-width: 600px) { .stage { height: 62vh; min-height: 360px; } }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.labels { position: absolute; inset: 0; pointer-events: none; }
+.dim-label {
+  font: 600 12px/1 var(--f-mono); color: var(--ink); background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; white-space: nowrap;
+}
+.dim-label.spec { color: var(--bad); border-color: var(--bad); }
+.tip {
+  position: absolute; pointer-events: none; font: 600 13px/1.2 var(--f-body); color: var(--accent-ink);
+  background: var(--accent); padding: 5px 8px; border-radius: 4px; transform: translate(12px, -130%); white-space: nowrap;
+}
+.stage-note { position: absolute; left: 12px; bottom: 10px; font: 400 12px/1.3 var(--f-body); color: var(--muted); pointer-events: none; }
+.stage-msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--muted); }
+
+/* Rail */
+.rail { display: grid; gap: 12px; min-width: 0; }
+.info { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 10px; min-height: 200px; }
+.info dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
+.info dt { color: var(--muted); }
+.info dd { margin: 0; min-width: 0; }
+.info .note { color: var(--ink); font-size: 14px; }
+.badge { display: inline-block; font: 600 11px/1 var(--f-body); letter-spacing: 0.04em; padding: 4px 7px; border-radius: 4px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+.badge.datasheet { color: var(--ok); }
+.badge.assumed { color: var(--warn); }
+.badge.designed { color: var(--accent); }
+.badge.notpo, .badge.outside { color: var(--bad); }
+.parts { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 0; max-height: 560px; overflow: auto; }
+.parts h3 { font: 600 11px/1 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 12px 14px 6px; }
+.part-btn {
+  width: 100%; text-align: left; background: none; border: 0; color: var(--ink); cursor: pointer;
+  padding: 7px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font: 400 14px/1.3 var(--f-body);
+}
+.part-btn .sz { grid-column: 1 / -1; color: var(--muted); font: 400 12px/1.3 var(--f-mono); }
+.part-btn:hover { background: var(--chip); }
+.part-btn[aria-current="true"] { background: var(--chip); box-shadow: inset 3px 0 0 var(--accent); }
+.part-btn .flags { display: inline-flex; gap: 4px; }
+
+/* Report */
+.report { display: grid; gap: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 22px; }
+.report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 22px 32px; }
+.report section { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.report ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.report li { max-width: 65ch; }
+.stack { display: grid; gap: 8px; }
+.bar-wrap { position: relative; padding-top: 24px; }
+.bar { display: flex; height: 30px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
+.bar span { height: 100%; }
+.marker { position: absolute; top: 0; bottom: -6px; border-left: 2px dashed var(--bad); }
+.marker b { position: absolute; top: 0; right: 6px; font: 600 12px/1 var(--f-mono); color: var(--bad); white-space: nowrap; }
+.axis { display: flex; justify-content: space-between; font: 400 11px/1 var(--f-mono); color: var(--muted); margin-top: 6px; }
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 6px 18px; margin: 4px 0 0; padding: 0; list-style: none; font-size: 14px; }
+.legend li { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: center; }
+.legend i { width: 12px; height: 12px; border-radius: 2px; display: block; }
+.legend .num { color: var(--muted); }
+.compare { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 520px) { .compare { grid-template-columns: minmax(0, 1fr); } }
+.compare div { border-top: 2px solid var(--line); padding-top: 8px; }
+.compare b { display: block; font: 600 22px/1.1 var(--f-mono); }
+.compare small { color: var(--muted); font-size: 13px; }
+.compare .grow b { color: var(--bad); }
+.foot { color: var(--muted); font-size: 13px; }
+.table-wrap { overflow-x: auto; }
+.print-table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+.print-table th { text-align: left; font: 600 11px/1.2 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.print-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.print-table td.mono { font-size: 12.5px; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="intro">
+      <span class="eyebrow">La Trobe Grand Challenge 2026 · Prototype fit check</span>
+      <h1>HydroTrack v3.0, built from the parts we ordered</h1>
+      <p class="lede">Every part is modelled at its real size from the purchase order, laid out so nothing collides. The white and clear parts are the five printable STL files. Drag to orbit, scroll to zoom, and click any part to see what it is.</p>
+    </div>
+    <dl class="sizes">
+      <div class="real"><dt>Real parts need</dt><dd>Ø63.5 × 123 mm</dd></div>
+      <div class="spec"><dt>Report promises</dt><dd>Ø60 × 85 mm</dd></div>
+    </dl>
+  </header>
+
+  <main class="bench">
+    <div class="stage-col">
+      <div class="toolbar" role="group" aria-label="View">
+        <span class="label">View</span>
+        <div class="seg" id="modeSeg">
+          <button type="button" id="mode-assembled" data-mode="assembled" aria-pressed="true">Assembled</button>
+          <button type="button" id="mode-xray" data-mode="xray" aria-pressed="false">X-ray</button>
+          <button type="button" id="mode-cutaway" data-mode="cutaway" aria-pressed="false">Cutaway</button>
+          <button type="button" id="mode-exploded" data-mode="exploded" aria-pressed="false">Exploded</button>
+        </div>
+        <label class="explode" id="explodeCtl" hidden>
+          <span class="label">Spread</span>
+          <input type="range" id="explodeRange" min="0" max="100" value="85">
+        </label>
+        <button type="button" class="chip" id="resetView" style="margin-left:auto">Reset view</button>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="tip" id="tip" hidden></div>
+        <div class="stage-note" id="stageNote">Units in mm · Halo colours follow the Wokwi firmware</div>
+        <div class="stage-msg" id="loading">Loading the printed parts…</div>
+      </div>
+
+      <div class="toolbar" role="group" aria-label="Halo and display">
+        <span class="label">Halo</span>
+        <div class="seg" id="haloSeg">
+          <button type="button" id="halo-optimal" data-halo="optimal" aria-pressed="true"><span class="dot" style="background:#2a55ff"></span>Optimal</button>
+          <button type="button" id="halo-approaching" data-halo="approaching" aria-pressed="false"><span class="dot" style="background:#ffa500"></span>Approaching</button>
+          <button type="button" id="halo-exceeded" data-halo="exceeded" aria-pressed="false"><span class="dot" style="background:#ff2a1a"></span>Exceeded</button>
+          <button type="button" id="halo-scald" data-halo="scald" aria-pressed="false"><span class="dot" style="background:#ff2a1a;box-shadow:0 0 0 2px #ff2a1a55"></span>Scald</button>
+        </div>
+        <button type="button" class="chip" id="tg-water" aria-pressed="true">Water flowing</button>
+        <button type="button" class="chip" id="tg-uv" aria-pressed="true">UV-C on</button>
+        <button type="button" class="chip" id="tg-tap" aria-pressed="true">Tap</button>
+        <button type="button" class="chip" id="tg-dims" aria-pressed="true">Dimensions</button>
+        <button type="button" class="chip" id="tg-spec" aria-pressed="false">Report size 60 × 85</button>
+      </div>
+    </div>
+
+    <aside class="rail">
+      <div class="info" id="info" aria-live="polite"></div>
+      <nav class="parts" id="parts" aria-label="Parts"></nav>
+    </aside>
+  </main>
+
+  <section class="report" aria-labelledby="fitTitle">
+    <div class="stack">
+      <span class="eyebrow">Fit report</span>
+      <h2 id="fitTitle">Where the extra size comes from</h2>
+    </div>
+
+    <div class="compare">
+      <div class="grow"><small>Body height</small><b class="num">123 mm</b><small>Report: 85 mm, so 38 mm (45%) taller</small></div>
+      <div class="grow"><small>Outside diameter</small><b class="num">Ø63.5 mm</b><small>Report: 60 mm. 63.5 mm (2½ in) is a stock tube size</small></div>
+      <div><small>Overall, base to tap thread</small><b class="num">129 mm</b><small>About 0.3 kg dry, 0.4 kg full of water</small></div>
+    </div>
+
+    <div class="stack">
+      <h3>Height, bottom to top, drawn to scale</h3>
+      <div class="bar-wrap" id="barWrap">
+        <div class="bar" id="heightBar" role="img" aria-label="Stacked height: halo ring and diffuser 5.5 mm, sensor and UV-C chamber with lid 48.5 mm, flow sensor and electronics bay 50 mm, radio band 16 mm, top cap 3 mm, tap thread 6 mm. The report's 85 mm body ends inside the flow sensor bay."></div>
+        <div class="marker" id="specMarker"><b>Report: 85 mm body</b></div>
+      </div>
+      <div class="axis"><span>0</span><span>32 mm</span><span>64.5 mm</span><span>97 mm</span><span>129 mm</span></div>
+      <ul class="legend" id="heightLegend"></ul>
+    </div>
+
+    <div class="report-grid">
+      <section>
+        <h3>Why it can’t shrink to 60 × 85 mm</h3>
+        <ul>
+          <li>The YF-S201C flow sensor is 63.5 mm long with its G½ threads. Add the tap adapter, the sensor chamber and the halo, and the water path alone passes 85 mm.</li>
+          <li>The TDS signal board (42 × 32 mm) has to sit beside the flow sensor. That needs 60.3 mm inside, more than the roughly 57 mm inside a 60 mm tube.</li>
+          <li>The TDS probe, thermistor and four UV-C windows need a chamber about 48 mm across and 42 mm deep.</li>
+          <li>Getting to 60 × 85 mm needs custom parts: a short inline flow sensor, the bare ESP32-S3 module on a ring-shaped PCB, and the TDS circuit on that same board. Those are the annular PCBs the report describes.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Needed, but not in the purchase order</h3>
+        <ul>
+          <li>M22 × G½ brass adapter to join the tap to the flow sensor.</li>
+          <li>Four fused-quartz discs, 6 × 1 mm. PETG and epoxy block 275 nm UV-C light.</li>
+          <li>A small UV-C LED boost driver. These LEDs need about 6 V, more than the 3.7 V battery gives.</li>
+          <li>A 48 × 1.5 mm nitrile O-ring for the chamber lid, a rubber washer for the tap joint and three M2 × 12 self-tapping screws.</li>
+          <li>Food-safe silicone to seal the thermistor port and the probe cable, and double-sided foam tape for the boards.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Build notes</h3>
+        <ul>
+          <li>Keep the ESP32 antenna inside the plastic band at the top. The aluminium sleeve blocks the 2.4 GHz radio.</li>
+          <li>The TDS probe cable is 83 cm long. Shorten it and re-crimp the XH2.54 plug.</li>
+          <li>The TDS probe is rated to 55 °C, so it survives a scald alarm but not a hot-water tap left at maximum.</li>
+          <li>The LiPo and TDS probe sizes here are typical values, not published ones. Measure both before printing the chamber.</li>
+        </ul>
+      </section>
+    </div>
+    <section class="stack" aria-labelledby="printTitle">
+      <h3 id="printTitle">The five printed parts</h3>
+      <div class="table-wrap">
+        <table class="print-table">
+          <thead><tr><th>File</th><th>Part</th><th>Filament</th><th>Lay it on the bed</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">01_chamber_cup.stl</td><td>Sensor &amp; UV-C chamber</td><td>White PETG, 4 walls, 100% infill near the floor</td><td>Floor down</td></tr>
+            <tr><td class="mono">02_chamber_lid.stl</td><td>Lid with G½ thread</td><td>White PETG, 0.12 mm layers for the thread</td><td>Flat side down, thread boss up</td></tr>
+            <tr><td class="mono">03_halo_diffuser.stl</td><td>Halo diffuser</td><td>Natural (clear) PETG, 2 walls, no infill pattern showing</td><td>Flat side down</td></tr>
+            <tr><td class="mono">04_electronics_carrier.stl</td><td>Electronics carrier</td><td>White PETG</td><td>Ring down, rails up</td></tr>
+            <tr><td class="mono">05_top_cap.stl</td><td>Top cap + radio band</td><td>White PETG</td><td>Top face down</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="foot">All five print without supports. They are in the project’s 3d-model/print folder with make_printed_parts.py, which rebuilds them after you change a measured size.</p>
+    </section>
+    <p class="foot">The Blender-ready model is HydroTrack_v3_real_parts.glb in the project’s 3d-model folder (File › Import › glTF 2.0). It imports at true size in metres, with every part named.</p>
+  </section>
+</div>
+
+<script src="hydrotrack-model.js" charset="utf-8"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const HT = window.HydroTrackModel;
+const stage = document.getElementById('stage');
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+// ---------- Height bar (static, drawn to scale) ----------
+const SEGMENTS = [
+  ['Halo ring + diffuser', 5.5, '--seg-halo'],
+  ['Sensor & UV-C chamber + lid', 48.5, '--seg-chamber'],
+  ['Flow sensor + electronics bay', 50, '--seg-bay'],
+  ['Radio window band', 16, '--seg-band'],
+  ['Top cap', 3, '--seg-cap'],
+  ['M22 tap thread', 6, '--seg-extra'],
+];
+const TOTAL = SEGMENTS.reduce((a, s) => a + s[1], 0);
+const bar = document.getElementById('heightBar');
+const legend = document.getElementById('heightLegend');
+for (const [name, mm, tok] of SEGMENTS) {
+  const s = document.createElement('span');
+  s.style.width = (mm / TOTAL * 100) + '%';
+  s.style.background = `var(${tok})`;
+  s.title = `${name}: ${mm} mm`;
+  bar.appendChild(s);
+  const li = document.createElement('li');
+  li.innerHTML = `<i style="background:var(${tok})"></i><span>${name}</span><span class="num">${mm} mm</span>`;
+  legend.appendChild(li);
+}
+// The report's 85 mm body starts where our body starts
+document.getElementById('specMarker').style.left = (85 / TOTAL * 100) + '%';
+
+// ---------- Parts rail ----------
+const SRC = {
+  datasheet: ['Datasheet size', 'datasheet'],
+  listing: ['Seller listing size', 'listing'],
+  assumed: ['Assumed size, measure it', 'assumed'],
+  designed: ['Printed or made part', 'designed'],
+};
+const GROUPS = ['Water path', 'Sensors', 'Light', 'Electronics', 'Enclosure', 'Context'];
+const partsNav = document.getElementById('parts');
+const btnById = {};
+for (const g of GROUPS) {
+  const items = HT.PARTS.filter((p) => p.group === g);
+  if (!items.length) continue;
+  const h = document.createElement('h3'); h.textContent = g; partsNav.appendChild(h);
+  for (const p of items) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'part-btn'; b.id = 'part-' + p.id;
+    b.innerHTML = `<span>${p.name}</span><span class="flags">${p.inPO === false ? '<span class="badge notpo">Not ordered</span>' : ''}<span class="badge outside" data-outside hidden>Outside</span></span><span class="sz">${p.size}</span>`;
+    b.addEventListener('click', () => select(p.id, true));
+    partsNav.appendChild(b);
+    btnById[p.id] = b;
+  }
+}
+const info = document.getElementById('info');
+function showOverview() {
+  info.innerHTML = `
+    <span class="eyebrow">How to read the model</span>
+    <h3>Pick a part</h3>
+    <p class="note">Click a part in the 3D view or in the list. X-ray and Cutaway show the inside; Exploded pulls everything apart.</p>
+    <dl>
+      <dt><span class="badge datasheet">Datasheet size</span></dt><dd>Manufacturer drawing</dd>
+      <dt><span class="badge listing">Seller listing size</span></dt><dd>Sellers agree within ~1 mm</dd>
+      <dt><span class="badge assumed">Assumed size</span></dt><dd>Not published, so measure it</dd>
+      <dt><span class="badge notpo">Not ordered</span></dt><dd>Needed, but missing from the order</dd>
+    </dl>`;
+}
+function showPart(p) {
+  const src = SRC[p.source];
+  const price = p.unit ? `₹${p.unit.toLocaleString('en-IN')}${p.qty ? ' each × ' + p.qty : ''}` : '—';
+  const order = p.context ? 'Not part of the product' : (p.inPO === false ? '<span class="badge notpo">Not in the purchase order</span>' : (p.po || '—'));
+  info.innerHTML = `
+    <span class="eyebrow">${p.group}</span>
+    <h3>${p.name}</h3>
+    <dl>
+      <dt>Size</dt><dd class="mono" style="font-size:13px">${p.size}</dd>
+      <dt>Size from</dt><dd><span class="badge ${src[1]}">${src[0]}</span></dd>
+      <dt>Order line</dt><dd>${order}</dd>
+      <dt>Unit price</dt><dd class="num">${price}</dd>
+    </dl>
+    <p class="note">${p.note}</p>`;
+}
+showOverview();
+
+// ---------- Three.js scene ----------
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+} catch (e) {
+  stage.insertAdjacentHTML('beforeend', '<div class="stage-msg">This browser can’t show 3D (WebGL is off). The fit report below still applies.</div>');
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.localClippingEnabled = true;
+stage.prepend(renderer.domElement);
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.domElement.className = 'labels';
+stage.appendChild(labelRenderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.6));
+const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(160, 260, 220); scene.add(key);
+const rim = new THREE.DirectionalLight(0xffffff, 0.6); rim.position.set(-200, 80, -160); scene.add(rim);
+const haloLight = new THREE.PointLight(0x2a55ff, 2, 170, 0); haloLight.position.set(0, -12, 0); scene.add(haloLight);
+const uvLight = new THREE.PointLight(0x8a4dff, 1.6, 34, 0); uvLight.position.set(0, 30, 0); scene.add(uvLight);
+
+const camera = new THREE.PerspectiveCamera(30, 1, 1, 6000);
+const HOME = { pos: new THREE.Vector3(250, 105, 350), target: new THREE.Vector3(-10, 50, 0) };
+camera.position.copy(HOME.pos);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.copy(HOME.target);
+controls.enableDamping = true;
+controls.minDistance = 70;
+controls.maxDistance = 1100;
+controls.update();
+
+let printed;
+try {
+  // The STL files travel inside one JSON bundle (written by print/make_printed_parts.py)
+  const res = await fetch('print/stl-bundle.json');
+  if (!res.ok) throw new Error('bundle ' + res.status);
+  const bundle = await res.json();
+  const bytes = async (p) => Uint8Array.from(atob(bundle[p.replace('print/', '')]), (c) => c.charCodeAt(0)).buffer;
+  printed = await HT.loadPrinted(THREE, STLLoader, toCreasedNormals, bytes, 'print/');
+  document.getElementById('loading').remove();
+} catch (e) {
+  document.getElementById('loading').textContent = 'The printed parts didn’t load, so they’re missing from the view. Reload to try again.';
+  printed = {};
+}
+const model = HT.build(THREE, { printed });
+const M = model.materials;
+scene.add(model.root);
+
+// Shell parts get their own materials so X-ray / Cutaway only affect them
+const SHELL_IDS = ['sleeve', 'topCap', 'chamber', 'lid'];
+const shellMeshes = [];
+for (const id of SHELL_IDS) model.parts[id].traverse((o) => {
+  if (!o.isMesh || o.userData.water) return;
+  o.material = o.material.clone();
+  o.material.side = THREE.DoubleSide;
+  o.material.userData.baseOpacity = o.material.opacity;
+  o.material.userData.baseTransparent = o.material.transparent;
+  o.userData.shell = true;
+  shellMeshes.push(o);
+});
+const cutPlane = new THREE.Plane(new THREE.Vector3(-0.574, 0, -0.819), 0);
+function setShellOpacity(a) {
+  for (const m of shellMeshes) {
+    const mat = m.material, transp = a < 0.999 || mat.userData.baseTransparent;
+    if (mat.transparent !== transp) { mat.transparent = transp; mat.needsUpdate = true; }
+    mat.opacity = mat.userData.baseOpacity * a;
+    mat.depthWrite = a >= 0.999 && !mat.userData.baseTransparent;
+  }
+}
+function setClip(on) {
+  for (const m of shellMeshes) { m.material.clippingPlanes = on ? [cutPlane] : null; m.material.needsUpdate = true; }
+}
+const waterMeshes = [];
+model.root.traverse((o) => { if (o.userData.water) waterMeshes.push(o); });
+
+// ---------- Which parts fall outside the report's Ø60 × 85 envelope ----------
+const SPEC_TOP = HT.BODY.height, SPEC_BOTTOM = HT.BODY.height - HT.SPEC.height, SPEC_R = HT.SPEC.od / 2;
+model.root.updateMatrixWorld(true);
+const outside = new Set();
+{
+  const v = new THREE.Vector3();
+  for (const p of HT.PARTS) {
+    if (p.context || p.id === 'adapter') continue;
+    let out = false;
+    model.parts[p.id].traverse((o) => {
+      if (out || !o.isMesh) return;
+      const pos = o.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i += 3) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+        if (Math.hypot(v.x, v.z) > SPEC_R + 0.01 || v.y < SPEC_BOTTOM - 0.01) { out = true; break; }
+      }
+    });
+    if (out) outside.add(p.id);
+  }
+}
+
+// ---------- Dimension lines and the spec envelope ----------
+const dims = new THREE.Group(); scene.add(dims);
+// CSS2D labels ignore their parents' visibility, so hide them explicitly
+function showGroup(g, on) { g.visible = on; g.traverse((o) => { if (o.isCSS2DObject) o.visible = on; }); }
+const lineMat = new THREE.LineBasicMaterial({ color: 0x888888 });
+const segLine = (pts) => new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map((p) => new THREE.Vector3(...p))), lineMat);
+const label = (text, pos, cls) => {
+  const d = document.createElement('div'); d.className = 'dim-label' + (cls ? ' ' + cls : ''); d.textContent = text;
+  const o = new CSS2DObject(d); o.position.set(...pos); return o;
+};
+{
+  const X = 50;
+  dims.add(segLine([[X, 0, 0], [X, 123, 0]]));
+  for (const y of [0, 123]) dims.add(segLine([[X - 4, y, 0], [X + 4, y, 0]]), segLine([[33, y, 0], [X - 4, y, 0]]));
+  dims.add(label('Body 123 mm', [X, 61, 0]));
+  const X2 = 74;
+  dims.add(segLine([[X2, 0, 0], [X2, 129, 0]]));
+  for (const y of [0, 129]) dims.add(segLine([[X2 - 4, y, 0], [X2 + 4, y, 0]]));
+  dims.add(label('Overall 129 mm', [X2, 24, 0]));
+  const Y = -18;
+  dims.add(segLine([[-31.75, Y, 0], [31.75, Y, 0]]));
+  for (const x of [-31.75, 31.75]) dims.add(segLine([[x, Y - 4, 0], [x, Y + 4, 0]]), segLine([[x, Y + 4, 0], [x, -1, 0]]));
+  dims.add(label('Ø 63.5 mm', [0, Y - 8, 0]));
+}
+const specGroup = new THREE.Group(); scene.add(specGroup);
+const specMat = new THREE.MeshBasicMaterial({ color: 0xd2452c, transparent: true, opacity: 0.14, depthWrite: false, side: THREE.DoubleSide });
+const specLineMat = new THREE.LineBasicMaterial({ color: 0xd2452c, depthTest: false, transparent: true });
+{
+  const h = HT.SPEC.height;
+  const geo = new THREE.CylinderGeometry(SPEC_R, SPEC_R, h, 72, 1, true); geo.translate(0, SPEC_BOTTOM + h / 2, 0);
+  specGroup.add(new THREE.Mesh(geo, specMat));
+  for (const y of [SPEC_BOTTOM, SPEC_TOP]) {
+    const pts = []; for (let i = 0; i <= 72; i++) { const a = i / 72 * Math.PI * 2; pts.push(new THREE.Vector3(SPEC_R * Math.cos(a), y, SPEC_R * Math.sin(a))); }
+    specGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), specLineMat));
+  }
+  for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + Math.PI / 4;
+    specGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(SPEC_R * Math.cos(a), SPEC_BOTTOM, SPEC_R * Math.sin(a)), new THREE.Vector3(SPEC_R * Math.cos(a), SPEC_TOP, SPEC_R * Math.sin(a))]), specLineMat)); }
+  specGroup.add(label('Report size Ø60 × 85 mm', [-SPEC_R - 4, SPEC_BOTTOM - 8, 0], 'spec'));
+}
+showGroup(specGroup, false);
+function applyThemeColors() {
+  lineMat.color.set(css('--muted') || '#888888');
+  const bad = css('--bad') || '#d2452c';
+  specMat.color.set(bad); specLineMat.color.set(bad);
+}
+applyThemeColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyThemeColors);
+new MutationObserver(applyThemeColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+// ---------- State ----------
+const state = { mode: 'assembled', explode: 0, explodeTarget: 0, spread: 0.85, halo: 'optimal', water: true, uv: true, selected: null };
+const selHelper = new THREE.BoxHelper(undefined, 0x0a7884); selHelper.visible = false; scene.add(selHelper);
+
+function setPressed(groupEl, attr, value) {
+  groupEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[attr] === value)));
+}
+function setMode(mode) {
+  state.mode = mode;
+  setPressed(document.getElementById('modeSeg'), 'mode', mode);
+  document.getElementById('explodeCtl').hidden = mode !== 'exploded';
+  state.explodeTarget = mode === 'exploded' ? state.spread : 0;
+  setClip(mode === 'cutaway');
+  if (mode !== 'exploded') setShellOpacity(mode === 'xray' ? 0.13 : 1);
+  showGroup(dims, document.getElementById('tg-dims').getAttribute('aria-pressed') === 'true' && mode !== 'exploded');
+}
+document.getElementById('modeSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
+document.getElementById('explodeRange').addEventListener('input', (e) => { state.spread = e.target.value / 100; if (state.mode === 'exploded') state.explodeTarget = state.spread; });
+document.getElementById('haloSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; state.halo = b.dataset.halo; setPressed(e.currentTarget, 'halo', state.halo); });
+function toggle(id, fn) {
+  const b = document.getElementById(id);
+  b.addEventListener('click', () => { const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); fn(on); });
+}
+toggle('tg-water', (on) => { state.water = on; });
+toggle('tg-uv', (on) => { state.uv = on; });
+toggle('tg-tap', (on) => { model.parts.tap.visible = on; if (state.selected === 'tap' && !on) select(null); });
+toggle('tg-dims', (on) => { showGroup(dims, on && state.mode !== 'exploded'); });
+toggle('tg-spec', (on) => {
+  showGroup(specGroup, on);
+  if (on && state.mode === 'assembled') setMode('xray');
+  for (const id in btnById) btnById[id].querySelector('[data-outside]').hidden = !(on && outside.has(id));
+  document.getElementById('stageNote').textContent = on
+    ? `${outside.size} of ${HT.PARTS.filter((p) => !p.context).length} parts fall outside the report’s Ø60 × 85 mm envelope`
+    : 'Units in mm · Halo colours follow the Wokwi firmware';
+});
+// Frame the device (and the spout end) whatever the stage's shape
+function homeView() {
+  const dir = HOME.pos.clone().sub(HOME.target).normalize();
+  const v = THREE.MathUtils.degToRad(camera.fov), h = 2 * Math.atan(Math.tan(v / 2) * camera.aspect);
+  camera.position.copy(HOME.target).addScaledVector(dir, 108 / Math.sin(Math.min(v, h) / 2));
+  controls.target.copy(HOME.target); controls.update();
+}
+document.getElementById('resetView').addEventListener('click', homeView);
+
+function select(id, fromList) {
+  state.selected = id;
+  for (const k in btnById) btnById[k].setAttribute('aria-current', String(k === id));
+  if (!id) { selHelper.visible = false; showOverview(); return; }
+  const p = HT.PARTS.find((q) => q.id === id);
+  showPart(p);
+  selHelper.setFromObject(model.parts[id]); selHelper.visible = true;
+  const internal = !p.shell && !p.context;
+  if (internal && state.mode === 'assembled') setMode('xray');
+  if (fromList) btnById[id].scrollIntoView({ block: 'nearest' });
+}
+
+// ---------- Picking ----------
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+const tip = document.getElementById('tip');
+function visibleChain(o) { for (let n = o; n; n = n.parent) if (!n.visible) return false; return true; }
+function pick(ev) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  const targets = [];
+  model.root.traverse((o) => {
+    if (!o.isMesh || o.userData.water) return;
+    if (o.userData.shell && state.mode !== 'assembled') return;
+    targets.push(o);
+  });
+  for (const hit of raycaster.intersectObjects(targets, false)) {
+    if (!visibleChain(hit.object)) continue;
+    let n = hit.object; while (n && !n.userData.partId) n = n.parent;
+    if (n) return n.userData.partId;
+  }
+  return null;
+}
+let down = null;
+renderer.domElement.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; });
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5) select(pick(e));
+  down = null;
+});
+let hoverEv = null;
+renderer.domElement.addEventListener('pointermove', (e) => { hoverEv = e.buttons ? null : e; if (e.buttons) tip.hidden = true; });
+renderer.domElement.addEventListener('pointerleave', () => { hoverEv = null; tip.hidden = true; });
+function doHover() {
+  if (!hoverEv) return;
+  const id = pick(hoverEv);
+  const r = stage.getBoundingClientRect();
+  if (id) {
+    tip.textContent = HT.PARTS.find((p) => p.id === id).name;
+    tip.style.left = (hoverEv.clientX - r.left) + 'px'; tip.style.top = (hoverEv.clientY - r.top) + 'px';
+    tip.hidden = false; renderer.domElement.style.cursor = 'pointer';
+  } else { tip.hidden = true; renderer.domElement.style.cursor = 'grab'; }
+  hoverEv = null;
+}
+
+// ---------- Explode ----------
+function applyExplode(t) {
+  for (const p of HT.PARTS) {
+    const g = model.parts[p.id]; if (!g) continue;
+    const e = p.explode || [0, 0, 0];
+    g.position.set(e[0] * t, e[1] * t, e[2] * t);
+  }
+  for (const sub of model.parts.uvc.children) { const a = -sub.rotation.y; sub.position.set(Math.cos(a) * 16 * t, 30, Math.sin(a) * 16 * t); }
+  model.parts.wires.visible = t < 0.02;
+  if (state.mode === 'exploded' || t > 0.001) setShellOpacity(state.mode === 'xray' ? 0.13 : 1 - 0.82 * Math.min(1, t / 0.6));
+}
+
+// ---------- Halo (matches the firmware tiers) ----------
+const COL = { blue: new THREE.Color('#2a55ff'), amber: new THREE.Color('#ffa500'), red: new THREE.Color('#ff2a1a') };
+const tmpCol = new THREE.Color();
+function haloFrame(ms) {
+  let k = 1, c = COL.blue, gain = 1;
+  if (state.halo === 'approaching') { c = COL.amber; k = reduceMotion ? 0.85 : 0.3 + 0.7 * (Math.sin(ms / 400) + 1) / 2; }
+  else if (state.halo === 'exceeded') { c = COL.red; gain = 0.6; k = reduceMotion ? 0.9 : 0.2 + 0.8 * (Math.sin(ms / 150) + 1) / 2; }
+  else if (state.halo === 'scald') { c = COL.red; gain = 0.6; k = reduceMotion ? 1 : (Math.floor(ms / 50) % 2 ? 1 : 0.02); }
+  tmpCol.copy(c);
+  k *= gain;  // saturated red washes out to pink under tone mapping, so it runs a little dimmer
+  M.haloLens.emissive.copy(tmpCol); M.haloLens.emissiveIntensity = 0.2 + 3.2 * k;
+  M.diffuser.emissive.copy(tmpCol); M.diffuser.emissiveIntensity = 0.1 + 1.9 * k;
+  M.water.emissive.copy(tmpCol); M.water.emissiveIntensity = 0.25 + 1.3 * k;
+  haloLight.color.copy(tmpCol); haloLight.intensity = 0.2 + 2.6 * k;
+  M.uvLens.emissiveIntensity = state.uv ? 2.4 : 0;
+  uvLight.intensity = state.uv ? 1.6 : 0;
+}
+
+// ---------- Resize + loop ----------
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); labelRenderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.fov = w < 560 ? 40 : 30;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+homeView();
+
+window.hydrotrack = { model, state, select, setMode };  // handy for poking at the scene from the console
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05), ms = performance.now();
+  if (Math.abs(state.explode - state.explodeTarget) > 0.0005) {
+    state.explode += (state.explodeTarget - state.explode) * Math.min(1, dt * (reduceMotion ? 30 : 6));
+    applyExplode(state.explode);
+    if (state.explode < 0.001 && state.mode !== 'exploded') setMode(state.mode);
+  }
+  const wet = state.water && state.explode < 0.02;
+  for (const w of waterMeshes) w.visible = wet;
+  if (wet && model.anim.rotor) model.anim.rotor.rotation.x += dt * (reduceMotion ? 4 : 22);
+  haloFrame(ms);
+  if (selHelper.visible) selHelper.update();
+  doHover();
+  controls.update();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+});
+</script>

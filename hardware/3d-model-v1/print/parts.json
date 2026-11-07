@@ -1,0 +1,120 @@
+{
+ "units": "mm",
+ "parts": [
+  {
+   "id": "chamber",
+   "file": "01_chamber_cup.stl",
+   "label": "Sensor & UV-C chamber cup",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    5.5,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "lid",
+   "file": "02_chamber_lid.stl",
+   "label": "Chamber lid with G\u00bd thread",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    51.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "diffuser",
+   "file": "03_halo_diffuser.stl",
+   "label": "Halo diffuser (natural/clear PETG)",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "carrier",
+   "file": "04_electronics_carrier.stl",
+   "label": "Electronics carrier",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    54.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "id": "topCap",
+   "file": "05_top_cap.stl",
+   "label": "Top cap + radio window band",
+   "matrix": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    0.0,
+    123.0,
+    0.0,
+    1.0
+   ]
+  }
+ ]
+}

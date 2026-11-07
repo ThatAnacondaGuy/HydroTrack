@@ -1,0 +1,2 @@
+# HydroTrack v3.0 — Wokwi Library Dependencies
+Adafruit NeoPixel
